@@ -3,11 +3,17 @@ import shortid from 'shortid';
 function App() {
   const[tarea,setTarea]= React.useState('')
   const[tareas,setTareas]=React.useState([])
+  const[modoEdit,setModoEdit]=React.useState(false)
+  const [id, setId] = React.useState('')
+  const [error,setError] = React.useState(null)
+
 
   const agregarTarea = e =>{
     e.preventDefault()
     if(!tarea.trim()){
       console.log("Complete el nombre de la tarea")
+      setError("[ERROR:] complete el campo")
+
       return
     }
     console.log(tarea)
@@ -16,11 +22,34 @@ function App() {
       {id:shortid.generate(),tarea:tarea}
     ])
     setTarea('')
+    setError(null)
   }
   const eliminar = id =>{
     //console.log(id)
     const arrayFiltrado = tareas.filter(item => item.id !== id)
     setTareas(arrayFiltrado)
+  }
+  const edit = item =>{
+    //console.log(item)
+    setModoEdit(true)
+    setTarea(item.tarea)
+    setId(item.id)
+    
+  }
+  const editTarea = e  =>{
+    e.preventDefault()
+    //console.log(e)
+    if(!tarea.trim()){
+      console.log("no se puede editar con el campo vacio")
+      setError("[ERROR:] complete el campo")
+      return
+    }
+    const arrayEdit = tareas.map(item => item.id === id ? {id, tarea } : item)
+    setTareas(arrayEdit)
+    setTarea('')
+    setModoEdit(false)
+    setId('')
+    setError(null)
   }
 
   return (
@@ -33,33 +62,47 @@ function App() {
          </h4>
          <ul className="list-group">
            {
-             tareas.map(item =>(
-              <li className="list-group-item" key={item.id}>
-              <span className=" fw-lighter text-muted">
-              {item.tarea}
-              </span>
-              <button
-              className="btn btn-danger btn-sm float-end mx-2"
-              onClick={ () => eliminar(item.id)}
-              >
-              Eliminar
-              </button>
-              <button
-              className="btn btn-warning btn-sm float-end">
-              Edit
-              </button>
-             </li>
-             ))
+             tareas.length===0 ? ( 
+               <li className="list-group-item">No hay tareas</li>
+             ) : (
+             
+                tareas.map(item =>(
+                 <li className="list-group-item" key={item.id}>
+                 <span className=" fw-lighter text-muted">
+                 {item.tarea}
+                 </span>
+                 <button
+                 className="btn btn-danger btn-sm float-end mx-2"
+                 onClick={ () => eliminar(item.id)}
+                 >
+                 Eliminar
+                 </button>
+                 <button
+                 className="btn btn-warning btn-sm float-end"
+                 onClick={() => edit(item)}
+                 >
+                 Edit
+                 </button>
+                </li>
+                ))
+              
+   
+             )
            }
-
+           
 
          </ul>
        </div>
        <div className="col-4">
          <h4 className="text-center">
-          Formulario
+            {
+              modoEdit ? 'Editar tarea' : 'Agregar tarea'
+            }
          </h4>
-         <form onSubmit={ agregarTarea}>
+         <form onSubmit={modoEdit ? editTarea : agregarTarea}>
+           {
+             error ? <span className="text-danger">{error}</span> : null
+           }
            <input
            type="text"
            className="form-control mb-2"
@@ -68,7 +111,13 @@ function App() {
            value={tarea}
            />
            <div className="d-grid gap-2">
-            <button className="btn btn-dark" type="submit">Add</button>
+           {
+              modoEdit ? (
+                <button className="btn btn-warning btn-block" type="submit">Editar</button>
+              ) : (
+                <button className="btn btn-dark btn-block" type="submit">Agregar</button>
+              )
+            }
            </div>
          </form>
        </div>
