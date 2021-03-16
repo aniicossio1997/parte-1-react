@@ -1,9 +1,11 @@
-import './App.css';
+import Saludo from "./components/Saludo";
 
 function App() {
   return (
     <div className="App">
-    <h1>HOLA</h1>
+      <Saludo persona="juan" edad={30}/>
+      <Saludo persona="antonio"/>
+
     </div>
   );
 }
